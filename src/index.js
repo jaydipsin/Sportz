@@ -7,9 +7,7 @@ const PORT = 8000;
 app.use(express.json());
 
 // Root endpoint
-app.get('/', (req, res) => {
-  res.json({ message: 'Sportz server is up and running!' });
-});
+app.use('/matches', matchRouter);
 
 // Start server on port 8000
 app.listen(PORT, () => {
