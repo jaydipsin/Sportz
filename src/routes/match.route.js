@@ -14,7 +14,7 @@ matchRouter.get('/', async (req, res) => {
         const matches = await db.select().from(matches).orderBy(matches.createdAt, 'desc').limit(limit);
         res.json({ success: true, matches });
     } catch (error) {
-        res.status(500).json({ success: false, error: 'internal server error' });
+        res.status(500).json({ success: false, error: 'internal server error', details: parsed.error.issues });
     }
 
 })
@@ -39,8 +39,7 @@ matchRouter.post('/', async (req, res) => {
         return res.status(201).json({ success: true, match: event })
 
     } catch (e) {
-        console.error(e)
-        res.status(500).json({ success: false, error: 'internal server error' })
+        res.status(500).json({ success: false, error: 'internal server error', details: parsed.error.issues })
     }
 
 })
