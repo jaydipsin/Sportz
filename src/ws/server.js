@@ -1,4 +1,4 @@
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 
 function sendJson(socket, payload) {
   if (socket.readyState !== WebSocket.OPEN) return;
@@ -7,9 +7,9 @@ function sendJson(socket, payload) {
 }
 
 function broadCast(wss, payload) {
-  for (client of wss.clients) {
-    if (socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify(payload));
+  for (const client of wss.clients) {
+    if (client.readyState !== WebSocket.OPEN) continue;
+    client.send(JSON.stringify(payload));
   }
 }
 
@@ -25,9 +25,9 @@ export function attachWebSocketServer(server) {
     socket.on("error", console.error);
   });
 
-  function broadCastMatchCreated(match) {
+  function broadcastMatchCreated(match) {
     broadCast(wss, { message: "Broascast", data: match });
   }
 
-  return { broadCastMatchCreated };
+  return { broadcastMatchCreated };
 }

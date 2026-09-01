@@ -1,4 +1,11 @@
 import { Router } from "express";
+import {
+  listMatchesQuerySchema,
+  createMatchSchema,
+} from "../validation/matches.js";
+import { db } from "../db.js";
+import { matches } from "../schema.js";
+import {getMatchStatus} from "./../utils/match-status.js"
 
 export const matchRouter = Router();
 
@@ -6,29 +13,37 @@ matchRouter.get("/", async (req, res) => {
   const parsed = listMatchesQuerySchema.safeParse(req.query);
 
   if (!parsed.success) {
-    return res.status(400).json({ success: false, error: parsed.error.errors });
+    return res.status(400).json({
+      success: false,
+      error: parsed.error.errors,
+    });
   }
 
   const limit = Math.min(parsed.data.limit || 25, 100);
+
   try {
-    const matches = await db
+    const matchList = await db
       .select()
       .from(matches)
       .orderBy(matches.createdAt, "desc")
       .limit(limit);
-    res.json({ success: true, matches });
+
+    return res.json({
+      success: true,
+      matches: matchList,
+    });
   } catch (error) {
-    res.status(500).json({
+    console.log("Error:", error);
+
+    return res.status(500).json({
       success: false,
       error: "internal server error",
     });
   }
-
 });
 
 matchRouter.post("/", async (req, res) => {
   const parsed = createMatchSchema.safeParse(req.body);
-
   if (!parsed.success) {
     return res.status(400).json({ success: false, error: parsed.error.errors });
   }
@@ -56,6 +71,7 @@ matchRouter.post("/", async (req, res) => {
 
     return res.status(201).json({ success: true, match: event });
   } catch (e) {
+    console.log("ERROR ", e);
     res.status(500).json({
       success: false,
       error: "internal server error",
